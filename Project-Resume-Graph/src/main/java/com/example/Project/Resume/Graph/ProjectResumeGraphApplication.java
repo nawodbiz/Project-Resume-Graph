@@ -3,6 +3,8 @@ package com.example.Project.Resume.Graph;
 
 
 
+import org.json.JSONObject;
+import org.json.JSONString;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,6 +23,7 @@ public class ProjectResumeGraphApplication {
 
 		SpringApplication.run(ProjectResumeGraphApplication.class, args);
 
+
 		File input = new File("G:\\professional\\NIMI\\Project Resume Graph\\malith gammanpila.html");
 		Document doc = Jsoup.parse(input, "UTF-8");
 
@@ -35,16 +38,23 @@ public class ProjectResumeGraphApplication {
 
 		ArrayList<Element> cleanListOfElements = new ArrayList<>();
 
+		ArrayList<String> jsonOutput = new ArrayList<>();
 
-		ArrayList<Element> companyName = new ArrayList<>();
-		ArrayList<Element> title = new ArrayList<>();
-		ArrayList<Element> description = new ArrayList<>();
-
+		Boolean havingMoreTitles = false;
 
 
-		ArrayList<ArrayList<Element>> experienceListArray = new ArrayList<ArrayList<Element>>();
+		String company = "";
+		String title = "";
+		String description = "";
+		String timePeriod = "";
 
 
+
+
+
+		ArrayList<ArrayList<String>> experienceListArray2 = new ArrayList<ArrayList<String>>();
+
+		ArrayList<String> exList = new ArrayList<>();
 
 		/**adding all elements to a Array list named allElements **/
 
@@ -121,65 +131,150 @@ public class ProjectResumeGraphApplication {
 			int styleIntigerValue2 = Integer.parseInt(beforeStyleValue.substring(10, 12));
 
 			if(i==1)
-				companyName.add(cleanListOfElements.get(0));
+				company = cleanListOfElements.get(0).text()+ " ";
 
-			if (styleIntigerValue1==10 && fontColor!="#b0b0b0" && i==cleanListOfElements.size()-1){
-				description.add(element);
+			if (styleIntigerValue1==10 && i==cleanListOfElements.size()-1){
+
+				description += element.text()+ " ";
 
 			}
 
 			if((styleIntigerValue1 ==12 && styleIntigerValue2 ==10) || i==cleanListOfElements.size()-1){
 
-				ArrayList<Element> experienceList = new ArrayList<>();
-
-				experienceList.addAll(companyName);
-				experienceList.addAll(title);
-
-				experienceList.addAll(description);
 
 
+				ArrayList<String> experienceList2 = new ArrayList<>();
 
-				experienceListArray.add(experienceList);
+				if (company!="")
+				company = company.substring(0,company.length()-1);
+				if (title!="")
+				title = title.substring(0,title.length()-1);
+				if (timePeriod!="")
+				timePeriod = timePeriod.substring(0,timePeriod.length()-1);
+				if (description!="")
+				description = description.substring(0,description.length()-1);
 
-				companyName.clear();
-				title.clear();
-				description.clear();
+				experienceList2.add(company);
+				experienceList2.add(title);
+				experienceList2.add(timePeriod);
+				experienceList2.add(description);
+
+				String jsonString = new JSONObject()
+						.put("company",company)
+						.put("title",title)
+						.put("time period",timePeriod)
+						.put("description",description)
+						.toString();
+
+				jsonOutput.add(jsonString);
+
+
+				experienceListArray2.add(experienceList2);
+
+
+				company = "";
+				title = "";
+				description = "";
+				timePeriod = "";
+
+				havingMoreTitles = false;
+
+			}
+
+
+			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && title.matches("")) ){
+				description="";
+				timePeriod="";
+			}
+			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && !title.matches("")) ){
+
+
+					havingMoreTitles = true;
+
+					ArrayList<String> experienceList2 = new ArrayList<>();
+
+				if (company!="")
+					company = company.substring(0,company.length()-1);
+				if (title!="")
+					title = title.substring(0,title.length()-1);
+				if (timePeriod!="")
+					timePeriod = timePeriod.substring(0,timePeriod.length()-1);
+				if (description!="")
+					description = description.substring(0,description.length()-1);
+
+					experienceList2.add(company);
+					experienceList2.add(title);
+					experienceList2.add(timePeriod);
+					experienceList2.add(description);
+
+					String jsonString = new JSONObject()
+							.put("company", company)
+							.put("title", title)
+							.put("time period", timePeriod)
+							.put("description", description)
+							.toString();
+					jsonOutput.add(jsonString);
+
+
+					experienceListArray2.add(experienceList2);
+
+
+					if (!havingMoreTitles)
+						company = "";
+					title = "";
+					description = "";
+					timePeriod = "";
+
 
 			}
 
 
 
-			if(i==cleanListOfElements.size()-1)
-				description.add(cleanListOfElements.get(cleanListOfElements.size()-1));
+
 
 			if (styleIntigerValue1==12 ){
-				companyName.add(element);
+
+				company += element.text() + " ";
 			}
 
 			if (styleIntigerValue1==11){
-				title.add(element);
+
+
+
+				title += element.text()+ " ";
 			}
 
 			if (styleIntigerValue1==10 && fontColor.matches("color:#181818")){
-				description.add(element);
-			}
+
+
+
+
+				if(beforeFontColor.matches("color:#b0b0b0")) {
+
+					timePeriod = description;
+
+					description = "";
+				}
+
+				description += element.text()+ " ";
+
+				}
 
 
 		}
 
 
-		for(int i=0; i<experienceListArray.size();i++){
 
-			System.out.println();
-			System.out.println("Experience "+(i+1));
-			System.out.println();
 
-			for(int j=0;j<experienceListArray.get(i).size();j++){
+//		for(int i =0;i<experienceListArray2.size();i++){
+//			System.out.println(experienceListArray2.get(i));
+//			}
 
-				System.out.println(experienceListArray.get(i).get(j).text());
 
-			}
-		}
+
+		System.out.println(jsonOutput.toString());
+
+
 
 	}
 
