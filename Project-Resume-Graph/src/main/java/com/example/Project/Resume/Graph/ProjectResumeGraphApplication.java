@@ -3,6 +3,8 @@ package com.example.Project.Resume.Graph;
 
 
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.fit.pdfdom.PDFDomTree;
 import org.json.JSONObject;
 import org.json.JSONString;
 import org.jsoup.Jsoup;
@@ -14,7 +16,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.File;
 
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 @SpringBootApplication
 public class ProjectResumeGraphApplication {
@@ -24,10 +31,16 @@ public class ProjectResumeGraphApplication {
 		SpringApplication.run(ProjectResumeGraphApplication.class, args);
 
 
-		File input = new File("G:\\professional\\NIMI\\Project Resume Graph\\malith gammanpila.html");
+		PDDocument pdf = PDDocument.load(new File("G:\\professional\\NIMI\\Project Resume Graph\\profile pdf samples\\from malith\\Profile (5).pdf"));
+		Writer output = new PrintWriter("G:\\professional\\NIMI\\Project Resume Graph\\profile pdf samples\\from malith\\Profile (5).html", "utf-8");
+		new PDFDomTree().writeText(pdf, output);
+
+		output.close();
+		pdf.close();
+
+
+		File input = new File("G:\\professional\\NIMI\\Project Resume Graph\\profile pdf samples\\from malith\\Profile (3).html");
 		Document doc = Jsoup.parse(input, "UTF-8");
-
-
 
 		Elements allElements = doc.getAllElements();
 
@@ -40,17 +53,13 @@ public class ProjectResumeGraphApplication {
 
 		ArrayList<String> jsonOutput = new ArrayList<>();
 
-		Boolean havingMoreTitles = false;
 
 
 		String company = "";
 		String title = "";
 		String description = "";
 		String timePeriod = "";
-
-
-
-
+		String location= "";
 
 		ArrayList<ArrayList<String>> experienceListArray2 = new ArrayList<ArrayList<String>>();
 
@@ -145,6 +154,25 @@ public class ProjectResumeGraphApplication {
 
 				ArrayList<String> experienceList2 = new ArrayList<>();
 
+				if(location.isEmpty()){
+					Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.year)?.\\d*.months?\\)");
+					Matcher matcher = pattern.matcher(description);
+					Boolean matchFound = matcher.find();
+
+
+
+					if(matchFound)
+						System.out.println(matcher.group(0) );
+
+				}
+
+				if(!location.isEmpty() && timePeriod.isEmpty()) {
+					timePeriod = description;
+					description = "";
+				}
+
+
+
 				if (company!="")
 				company = company.substring(0,company.length()-1);
 				if (title!="")
@@ -176,20 +204,24 @@ public class ProjectResumeGraphApplication {
 				title = "";
 				description = "";
 				timePeriod = "";
+				location="";
 
-				havingMoreTitles = false;
+//				havingMoreTitles = false;
 
 			}
 
+			/**in order to remove experiences with no title , like only having time period*/
 
-			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && title.matches("")) ){
-				description="";
-				timePeriod="";
-			}
-			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && !title.matches("")) ){
+//			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && title.matches("")) ){
+//				description="";
+//				timePeriod="";
+//			}
 
+//			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && !title.matches("")) ){
 
-					havingMoreTitles = true;
+			if(styleIntigerValue1 ==11 && styleIntigerValue2 ==10 ){
+
+//					havingMoreTitles = true;
 
 					ArrayList<String> experienceList2 = new ArrayList<>();
 
@@ -219,11 +251,12 @@ public class ProjectResumeGraphApplication {
 					experienceListArray2.add(experienceList2);
 
 
-					if (!havingMoreTitles)
-						company = "";
+//					if (!havingMoreTitles)
+//						company = "";
 					title = "";
 					description = "";
 					timePeriod = "";
+					location="";
 
 
 			}
@@ -242,10 +275,17 @@ public class ProjectResumeGraphApplication {
 
 
 				title += element.text()+ " ";
+
+
 			}
 
-			if (styleIntigerValue1==10 && fontColor.matches("color:#181818")){
+			//identify location
+			if(styleIntigerValue1==10 && fontColor.matches("color:#b0b0b0")){
+				location += location+ " ";
+			}
 
+
+			if (styleIntigerValue1==10 && fontColor.matches("color:#181818")){
 
 
 
@@ -254,11 +294,14 @@ public class ProjectResumeGraphApplication {
 					timePeriod = description;
 
 					description = "";
+
+//
+
 				}
 
-				description += element.text()+ " ";
+				description += element.text() + " ";
 
-				}
+			}
 
 
 		}
