@@ -1,9 +1,14 @@
 package com.example.Project.Resume.Graph;
 
 
-import com.example.Project.Resume.Graph.pdfbox.PDFReader;
+
+
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+
+
 
 @SpringBootApplication
 public class ProjectResumeGraphApplication {
@@ -14,11 +19,9 @@ public class ProjectResumeGraphApplication {
 
 
 
-
 	}
 
-
-
-
-
 }
+
+
+

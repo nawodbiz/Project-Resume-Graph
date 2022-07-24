@@ -79,8 +79,8 @@ public class test2 {
 
                 cleanListOfElements.add(element);
 
-                }
             }
+        }
 
         /**
          * seperating the captured content into experiences one by one
@@ -103,9 +103,11 @@ public class test2 {
             int styleIntigerValue1 = Integer.parseInt(styleValue.substring(10,12));
             int styleIntigerValue2 = Integer.parseInt(nextStyleValue.substring(10,12));
 
-            oneExperience.add(cleanListOfElements.get(i));
+//            oneExperience.add(cleanListOfElements.get(i));
 
             if(styleIntigerValue1<styleIntigerValue2){
+
+
                 indexesOfBreakings.add(i);
 //                break;
             }
@@ -113,11 +115,7 @@ public class test2 {
         }
 //        System.out.println(oneExperience.toString());
 
-        System.out.println(indexesOfBreakings.toString());
 
-        for(int i= ;;){
-
-        }
 
 
 
