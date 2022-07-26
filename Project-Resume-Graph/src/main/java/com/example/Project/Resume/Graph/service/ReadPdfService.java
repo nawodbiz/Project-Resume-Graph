@@ -1,5 +1,6 @@
 package com.example.Project.Resume.Graph.service;
 
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.fit.pdfdom.PDFDomTree;
 import org.json.JSONObject;
@@ -7,31 +8,132 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.*;
+
+
 import java.util.ArrayList;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class ReadPdfService {
 
-public String extractExperiences(String fileLocation) throws Exception {
+    @Autowired
+    FileManageService fileManageService;
+
+public String extractExperiences(MultipartFile file) throws IOException {
+
+//    File tempFile = null;
+//    BufferedWriter writer = null;
 
 
-    PDDocument pdf = PDDocument.load(new File(fileLocation+".pdf"));
-    Writer output = new PrintWriter(fileLocation+".html", "utf-8");
+
+//        String dirPath = System.getProperty("user.dir");
+//        File tempFile = File.createTempFile("read_this",".pdf", new File(dirPath));
+//
+//        try{
+//            final Path path = Files.createTempFile("temporary", ".txt");
+//            byte[] pdfData = file.getBytes();
+//            Files.write(path,pdfData);
+//        }catch (Exception e){
+//            System.out.println(e);
+//        }
+
+
+
+
+
+
+
+//    file.transferTo(new File(dirPath + file.getOriginalFilename()));
+
+//    try{
+//        tempFile = File.createTempFile("read_this",".pdf", new File(dirPath));
+//        writer = new BufferedWriter(
+//                new FileWriter(tempFile));
+//        writer.write(file.getBytes().toString());
+//
+//        System.out.println(tempFile.toString());
+//
+//
+//    }catch (IOException e){
+//        e.printStackTrace();
+//    }finally {
+//        writer.close();
+//    }
+//
+//
+//    try{
+//        tempFile = File.createTempFile("read_this",".pdf", new File(dirPath));
+//        writer = new BufferedWriter(
+//                new FileWriter(tempFile));
+//        writer.write(file.getBytes().toString());
+//
+//        System.out.println(tempFile.toString());
+//
+//
+//    }catch (IOException e){
+//        e.printStackTrace();
+//    }finally {
+//        writer.close();
+//    }
+//
+//    PDDocument pdf = PDDocument.load(new File(String.valueOf(tempFile)));
+//
+//    File tempFile2 = File.createTempFile("read_this2",".html", new File(dirPath));
+//
+//    Writer output = new PrintWriter(tempFile2+".html", "utf-8");
+//    new PDFDomTree().writeText(pdf, output);
+//
+//    BufferedWriter writer2 = new BufferedWriter(
+//            new FileWriter(String.valueOf(output)));
+//    writer2.write(output.toString());
+//
+//    output.close();
+//    pdf.close();
+//
+//
+//    File input = new File(tempFile2+".html");
+//    Document doc = Jsoup.parse(input, "UTF-8");
+
+//    String fileName = file.getOriginalFilename();
+//    try {
+//        file.transferTo( new File(System.getProperty("user.dir") + fileName));
+//    } catch (Exception e) {
+//        System.out.println(e);
+//    }
+//    String fileLocation = "Project-Resume-Graph/uploaded/"+file.getOriginalFilename();
+
+//    PDDocument pdf = PDDocument.load(new File(fileLocation));
+//    Writer output = new PrintWriter(fileLocation+".html", "utf-8");
+//    new PDFDomTree().writeText(pdf, output);
+//
+//    output.close();
+//    pdf.close();
+//
+//
+//    File input = new File(fileLocation+".html");
+//    Document doc = Jsoup.parse(input, "UTF-8");
+
+    String savedFileLocation = fileManageService.getSavedFileLocation(file);
+
+    PDDocument pdf = PDDocument.load(new File(savedFileLocation));
+    Writer output = new PrintWriter(savedFileLocation.substring(0,savedFileLocation.length()-4)+".html", "utf-8");
     new PDFDomTree().writeText(pdf, output);
 
     output.close();
     pdf.close();
 
 
-    File input = new File(fileLocation+".html");
+    File input = new File(savedFileLocation.substring(0,savedFileLocation.length()-4)+".html");
     Document doc = Jsoup.parse(input, "UTF-8");
 
     Elements allElements = doc.getAllElements();
@@ -211,7 +313,7 @@ public String extractExperiences(String fileLocation) throws Exception {
             String jsonString = new JSONObject()
                     .put("company",company)
                     .put("title",title)
-                    .put("time period",timePeriod)
+                    .put("timePeriod",timePeriod)
                     .put("description",description)
                     .toString();
 
@@ -364,6 +466,9 @@ public String extractExperiences(String fileLocation) throws Exception {
 
 
     }
+
+    fileManageService.discardFiles(savedFileLocation);
+    fileManageService.discardFiles(savedFileLocation.substring(0,savedFileLocation.length()-4)+".html");
 
     return jsonOutput.toString();
 
