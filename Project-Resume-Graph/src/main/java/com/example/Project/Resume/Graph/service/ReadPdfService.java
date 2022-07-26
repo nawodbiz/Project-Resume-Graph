@@ -10,7 +10,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,17 +18,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.UUID;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class ReadPdfService {
+
+    @Autowired
+    FileManageService fileManageService;
 
 public String extractExperiences(MultipartFile file) throws IOException {
 
@@ -124,20 +123,7 @@ public String extractExperiences(MultipartFile file) throws IOException {
 //    File input = new File(fileLocation+".html");
 //    Document doc = Jsoup.parse(input, "UTF-8");
 
-    String savedFileLocation = "uploaded/"+ UUID.randomUUID().toString()+".pdf";
-
-    File fileToSave = new File(savedFileLocation);
-
-    fileToSave.getParentFile().mkdirs();
-    fileToSave.delete();
-
-    Path folder = Paths.get(savedFileLocation);
-    Path fileToSavePath = Files.createFile(folder);
-
-    InputStream  fileInputStream = file.getInputStream();
-
-    Files.copy(fileInputStream, fileToSavePath, StandardCopyOption.REPLACE_EXISTING);
-    System.out.println(fileToSavePath.toString());
+    String savedFileLocation = fileManageService.getSavedFileLocation(file);
 
     PDDocument pdf = PDDocument.load(new File(savedFileLocation));
     Writer output = new PrintWriter(savedFileLocation.substring(0,savedFileLocation.length()-4)+".html", "utf-8");
@@ -327,7 +313,7 @@ public String extractExperiences(MultipartFile file) throws IOException {
             String jsonString = new JSONObject()
                     .put("company",company)
                     .put("title",title)
-                    .put("time period",timePeriod)
+                    .put("timePeriod",timePeriod)
                     .put("description",description)
                     .toString();
 
@@ -480,6 +466,9 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
 
     }
+
+    fileManageService.discardFiles(savedFileLocation);
+    fileManageService.discardFiles(savedFileLocation.substring(0,savedFileLocation.length()-4)+".html");
 
     return jsonOutput.toString();
 
