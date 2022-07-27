@@ -35,41 +35,4 @@ public class PDFController {
     }
 
 
-//    @PostMapping("/upload")
-//    public void uploadFiles(@RequestParam("file") MultipartFile file ) throws IOException {
-//
-//        String savedFileLocation = "uploaded/"+ UUID.randomUUID().toString()+".pdf";
-//
-////        File fileToSave = new File(file.getOriginalFilename());
-//
-//        File fileToSave = new File(savedFileLocation);
-//
-//        fileToSave.getParentFile().mkdirs();
-//        fileToSave.delete();
-//
-//        Path folder = Paths.get(savedFileLocation);
-//        Path fileToSavePath = Files.createFile(folder);
-//
-//        InputStream  fileInputStream = file.getInputStream();
-//
-//        Files.copy(fileInputStream, fileToSavePath, StandardCopyOption.REPLACE_EXISTING);
-//        System.out.println(fileToSavePath.toString());
-//
-//        PDDocument pdf = PDDocument.load(new File(savedFileLocation));
-//        Writer output = new PrintWriter(savedFileLocation.substring(0,savedFileLocation.length()-4)+".html", "utf-8");
-//        new PDFDomTree().writeText(pdf, output);
-//
-//        output.close();
-//        pdf.close();
-//
-//
-//        File input = new File(savedFileLocation.substring(0,savedFileLocation.length()-4)+".html");
-//        Document doc = Jsoup.parse(input, "UTF-8");
-//
-//
-//
-//
-//    }
-
-
 }
