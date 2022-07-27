@@ -31,98 +31,6 @@ public class ReadPdfService {
 
 public String extractExperiences(MultipartFile file) throws IOException {
 
-//    File tempFile = null;
-//    BufferedWriter writer = null;
-
-
-
-//        String dirPath = System.getProperty("user.dir");
-//        File tempFile = File.createTempFile("read_this",".pdf", new File(dirPath));
-//
-//        try{
-//            final Path path = Files.createTempFile("temporary", ".txt");
-//            byte[] pdfData = file.getBytes();
-//            Files.write(path,pdfData);
-//        }catch (Exception e){
-//            System.out.println(e);
-//        }
-
-
-
-
-
-
-
-//    file.transferTo(new File(dirPath + file.getOriginalFilename()));
-
-//    try{
-//        tempFile = File.createTempFile("read_this",".pdf", new File(dirPath));
-//        writer = new BufferedWriter(
-//                new FileWriter(tempFile));
-//        writer.write(file.getBytes().toString());
-//
-//        System.out.println(tempFile.toString());
-//
-//
-//    }catch (IOException e){
-//        e.printStackTrace();
-//    }finally {
-//        writer.close();
-//    }
-//
-//
-//    try{
-//        tempFile = File.createTempFile("read_this",".pdf", new File(dirPath));
-//        writer = new BufferedWriter(
-//                new FileWriter(tempFile));
-//        writer.write(file.getBytes().toString());
-//
-//        System.out.println(tempFile.toString());
-//
-//
-//    }catch (IOException e){
-//        e.printStackTrace();
-//    }finally {
-//        writer.close();
-//    }
-//
-//    PDDocument pdf = PDDocument.load(new File(String.valueOf(tempFile)));
-//
-//    File tempFile2 = File.createTempFile("read_this2",".html", new File(dirPath));
-//
-//    Writer output = new PrintWriter(tempFile2+".html", "utf-8");
-//    new PDFDomTree().writeText(pdf, output);
-//
-//    BufferedWriter writer2 = new BufferedWriter(
-//            new FileWriter(String.valueOf(output)));
-//    writer2.write(output.toString());
-//
-//    output.close();
-//    pdf.close();
-//
-//
-//    File input = new File(tempFile2+".html");
-//    Document doc = Jsoup.parse(input, "UTF-8");
-
-//    String fileName = file.getOriginalFilename();
-//    try {
-//        file.transferTo( new File(System.getProperty("user.dir") + fileName));
-//    } catch (Exception e) {
-//        System.out.println(e);
-//    }
-//    String fileLocation = "Project-Resume-Graph/uploaded/"+file.getOriginalFilename();
-
-//    PDDocument pdf = PDDocument.load(new File(fileLocation));
-//    Writer output = new PrintWriter(fileLocation+".html", "utf-8");
-//    new PDFDomTree().writeText(pdf, output);
-//
-//    output.close();
-//    pdf.close();
-//
-//
-//    File input = new File(fileLocation+".html");
-//    Document doc = Jsoup.parse(input, "UTF-8");
-
     String savedFileLocation = fileManageService.getSavedFileLocation(file);
 
     PDDocument pdf = PDDocument.load(new File(savedFileLocation));
@@ -199,7 +107,7 @@ public String extractExperiences(MultipartFile file) throws IOException {
         String[] styleValues = style.split(";");
         String styleValue = styleValues[0];
 
-//selecting exclude and include element attributes
+
 
         if (styleValue.startsWith("top") && !styleValues[4].matches("font-size:9.0pt")
                 && !styleValues[1].matches("left:0.0pt") && !styleValue.matches("top:-2.621973pt") ) {
@@ -333,14 +241,6 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
         }
 
-        /**in order to remove experiences with no title , like only having time period*/
-
-//			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && title.matches("")) ){
-//				description="";
-//				timePeriod="";
-//			}
-
-//			if((styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && !title.matches("")) ){
 
         if(styleIntigerValue1 ==11 && styleIntigerValue2 ==10 ){
 
@@ -412,8 +312,7 @@ public String extractExperiences(MultipartFile file) throws IOException {
             experienceListArray.add(experienceList2);
 
 
-//					if (!havingMoreTitles)
-//						company = "";
+
             title = "";
             description = "";
             timePeriod = "";
@@ -456,7 +355,7 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
                 description = "";
 
-//
+
 
             }
 
