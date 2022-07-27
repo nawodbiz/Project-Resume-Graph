@@ -20,6 +20,7 @@ import java.io.*;
 
 import java.util.ArrayList;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,6 +56,11 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
     ArrayList<String> jsonOutput = new ArrayList<>();
 
+    List<String> positionsList = new ArrayList<>();
+
+    String mainCompany = "";
+    String mainTimeDuration = "";
+
 
 
     String company = "";
@@ -62,6 +68,10 @@ public String extractExperiences(MultipartFile file) throws IOException {
     String description = "";
     String timePeriod = "";
     String location= "";
+
+    Boolean hasSeveralTitles = false;
+
+    Boolean hasServiceDuration = false;
 
     ArrayList<ArrayList<String>> experienceListArray = new ArrayList<ArrayList<String>>();
 
@@ -218,14 +228,58 @@ public String extractExperiences(MultipartFile file) throws IOException {
             experienceList2.add(timePeriod);
             experienceList2.add(description);
 
-            String jsonString = new JSONObject()
-                    .put("company",company)
-                    .put("title",title)
-                    .put("timePeriod",timePeriod)
-                    .put("description",description)
-                    .toString();
 
-            jsonOutput.add(jsonString);
+
+            if(hasSeveralTitles){
+
+                String jsonString = new JSONObject()
+                        .put("company", company)
+                        .put("title", title)
+                        .put("time period", timePeriod)
+                        .put("description", description)
+                        .toString();
+                positionsList.add(jsonString);
+
+
+
+                hasSeveralTitles = false;
+
+            } else if (hasServiceDuration) {
+
+                String jsonString = new JSONObject()
+                        .put("company",mainCompany)
+
+                        .put("timePeriod",mainTimeDuration)
+
+                        .put("positions", positionsList)
+                        .toString();
+
+                jsonOutput.add(jsonString);
+
+                hasServiceDuration = false;
+
+
+
+            } else if(!hasServiceDuration){
+
+                String jsonString = new JSONObject()
+                        .put("company",company)
+                        .put("title",title)
+                        .put("timePeriod",timePeriod)
+                        .put("description",description)
+                        .put("positions", positionsList)
+                        .toString();
+
+                jsonOutput.add(jsonString);
+
+            }
+
+
+
+
+
+
+//            positionsList.clear();
 
 
             experienceListArray.add(experienceList2);
@@ -242,7 +296,24 @@ public String extractExperiences(MultipartFile file) throws IOException {
         }
 
 
-        if(styleIntigerValue1 ==11 && styleIntigerValue2 ==10 ){
+        if(styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && title.isEmpty()){
+
+
+
+            mainCompany = company;
+            mainTimeDuration = description;
+
+            description = "";
+
+            hasSeveralTitles = true;
+
+            hasServiceDuration = true;
+
+
+        }
+        if(styleIntigerValue1 ==11 && styleIntigerValue2 ==10 && !title.isEmpty()){
+
+            hasSeveralTitles = true;
 
 
 
@@ -306,7 +377,7 @@ public String extractExperiences(MultipartFile file) throws IOException {
                     .put("time period", timePeriod)
                     .put("description", description)
                     .toString();
-            jsonOutput.add(jsonString);
+            positionsList.add(jsonString);
 
 
             experienceListArray.add(experienceList2);
