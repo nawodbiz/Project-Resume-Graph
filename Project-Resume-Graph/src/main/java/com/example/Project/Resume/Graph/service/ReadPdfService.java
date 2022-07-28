@@ -59,7 +59,7 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
     ArrayList<String> jsonOutput = new ArrayList<>();
 
-    List<String> positionsList = new ArrayList<>();
+    List<JSONObject> positionsList = new ArrayList<>();
 
     String mainCompany = "";
     String mainTimeDuration = "";
@@ -81,6 +81,8 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
     String shortDuration = "";
     String longDuration = "";
+
+    JSONObject timePeriodObject;
 
 
 
@@ -193,13 +195,13 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
 
                 if(matchFound){
-                    timePeriod = matcher.group(0);
+                    timePeriod = matcher.group(1);
 
-                    longDuration = jsonStringService.getLongDuration(timePeriod);
+//                    longDuration = jsonStringService.getLongDuration(timePeriod);
 
 
 
-                    System.out.println(longDuration);
+//                    System.out.println(longDuration);
 
                     description = description.substring(timePeriod.length(),description.length()-1);
 
@@ -215,16 +217,10 @@ public String extractExperiences(MultipartFile file) throws IOException {
                 Boolean matchFound = matcher.find();
 
 
-
-
-
-
-
-
                 if(matchFound){
                     timePeriod = matcher.group(0);
 
-                    shortDuration = jsonStringService.getShortDuration(timePeriod);
+
 
                     description = description.substring(timePeriod.length(),description.length()-1);
                 }
@@ -260,12 +256,12 @@ public String extractExperiences(MultipartFile file) throws IOException {
 
 
 
-                String jsonString = new JSONObject()
-                        .put("company", company)
-                        .put("title", title)
-                        .put("time duration", longDuration)
-                        .put("description", description)
-                        .toString();
+                JSONObject jsonString = new JSONObject();
+                        jsonString.put("company", company);
+                        jsonString.put("title", title);
+                        jsonString.put("time duration", jsonStringService.getLongDuration(timePeriod));
+                        jsonString.put("description", description);
+
                 positionsList.add(jsonString);
 
 
@@ -411,12 +407,12 @@ public String extractExperiences(MultipartFile file) throws IOException {
             experienceList2.add(timePeriod);
             experienceList2.add(description);
 
-            String jsonString = new JSONObject()
-                    .put("company", company)
-                    .put("title", title)
-                    .put("time period", jsonStringService.getLongDuration(timePeriod))
-                    .put("description", description)
-                    .toString();
+            JSONObject jsonString = new JSONObject();
+                    jsonString.put("company", company);
+                    jsonString.put("title", title);
+                    jsonString.put("time period", jsonStringService.getLongDuration(timePeriod));
+                    jsonString.put("description", description);
+
             positionsList.add(jsonString);
 
 

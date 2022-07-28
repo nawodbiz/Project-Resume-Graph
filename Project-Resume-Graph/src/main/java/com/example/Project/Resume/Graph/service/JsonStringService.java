@@ -21,7 +21,7 @@ public class JsonStringService {
 
 
 
-    public String getShortDuration(String duration){
+    public JSONObject getShortDuration(String duration){
 
 
         Pattern pattern = Pattern.compile("((\\d*).years?.)?(\\d*).months?");
@@ -32,22 +32,22 @@ public class JsonStringService {
 
 
 
-            String jsonString1 = new JSONObject()
-                    .put("years", matcher.group(2))
-                    .put("months", matcher.group(3))
+            JSONObject jsonObject = new JSONObject();
+                   jsonObject .put("years", matcher.group(2));
+                   jsonObject.put("months", matcher.group(3));
 
-                    .toString();
 
-            return jsonString1;
+
+            return jsonObject;
 
 
 
         }else
-            return "not found";
+            return null;
 
     }
 
-    public String getShortDuration2 (String duration){
+    public JSONObject getShortDuration2 (String duration){
 
 
         Pattern pattern = Pattern.compile("([A-Za-z]*)\\s(\\d*)");
@@ -61,25 +61,25 @@ public class JsonStringService {
 
 
 
-            String jsonString = new JSONObject()
-                    .put("month", matcher.group(1))
-                    .put("year", matcher.group(2))
+            JSONObject jsonObject = new JSONObject();
+                   jsonObject.put("month", matcher.group(1));
+                    jsonObject.put("year", matcher.group(2));
 
-                    .toString();
 
-            return jsonString;
+
+            return jsonObject;
 
 
 
 
         }else
-            return "present";
+            return null;
 
     }
 
 
 
-    public String getLongDuration(String duration){
+    public JSONObject getLongDuration(String duration){
 
 
         Pattern pattern = Pattern.compile("([A-Za-z]*.\\d{4}).-.([A-Za-z]*.\\d{4}|Present).\\(((\\d*.year)?.\\d*.months?)\\)");
@@ -89,17 +89,21 @@ public class JsonStringService {
 
         if(matchFound){
 
-            String jsonString2 = new JSONObject()
-                    .put("starting", getShortDuration2(matcher.group(1)))
-                    .put("ending", getShortDuration2(matcher.group(2)))
-                    .put("duration", getShortDuration(matcher.group(3)))
-                    .toString();
+            JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("starting", getShortDuration2(matcher.group(1)));
+                    if(getShortDuration2(matcher.group(2))==null)
+                        jsonObject.put("ending","present");
+                    else
+                        jsonObject.put("ending", getShortDuration2(matcher.group(2)));
+
+                    jsonObject.put("duration", getShortDuration(matcher.group(3)));
 
 
-            return jsonString2.replaceAll("\\ ","");
+
+            return jsonObject;
 
         }else
-            return "not found";
+            return null;
 
 
 
