@@ -14,9 +14,6 @@ import java.util.UUID;
 
 @Service
 public class FileManageService {
-
-
-
     public String getSavedFileLocation(MultipartFile file) throws IOException {
 
         String savedFileLocation = "uploaded/"+ UUID.randomUUID().toString()+".pdf";
@@ -34,21 +31,15 @@ public class FileManageService {
         Files.copy(fileInputStream, fileToSavePath, StandardCopyOption.REPLACE_EXISTING);
 
         return savedFileLocation;
-
-
-
     }
-
     public void discardFiles(String savedFileLocation){
         {
             try {
                 Files.deleteIfExists(Paths.get(savedFileLocation));
             }
-
             catch (IOException e) {
                 System.out.println(e);
             }
-
         }
     }
 }
