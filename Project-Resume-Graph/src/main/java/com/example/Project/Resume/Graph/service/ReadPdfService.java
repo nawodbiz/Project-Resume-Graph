@@ -1,6 +1,7 @@
 package com.example.Project.Resume.Graph.service;
 
 
+import lombok.Data;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.fit.pdfdom.PDFDomTree;
 import org.json.JSONObject;
@@ -22,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@Data
 public class ReadPdfService {
 
     @Autowired
@@ -29,6 +31,8 @@ public class ReadPdfService {
 
     @Autowired
     JsonStringService jsonStringService;
+
+    JSONObject profileDetails = new JSONObject();
 
     public String extractExperiences(MultipartFile file) throws IOException {
 
@@ -48,14 +52,19 @@ public class ReadPdfService {
 
         int expBegins = 0;
         int expEnds = 0;
+        int contactIndex = 0;
+        int topSkillsIndex = 0;
 
         ArrayList<Element> listOfElements = new ArrayList<>();
 
         ArrayList<Element> cleanListOfElements = new ArrayList<>();
 
-        ArrayList<String> jsonOutput = new ArrayList<>();
+        ArrayList<JSONObject> experienceList = new ArrayList<>();
+        JSONObject finalJsonOutput = new JSONObject();
 
         List<JSONObject> positionsList = new ArrayList<>();
+        JSONObject profileDetails = new JSONObject();
+        JSONObject jsonData = new JSONObject();
 
         String mainCompany = "";
         String mainTimeDuration = "";
@@ -67,6 +76,15 @@ public class ReadPdfService {
         String location = "";
 
         Boolean hasOnlyServiceDuration = false;
+
+        String profileName = "";
+        String currentPosition = "";
+        String currentLocation = "";
+        String currentPositionTemp = "";
+        String emailAddress = "";
+        String linkedinProfileLink = "";
+        Boolean successResponse = true;
+
 
         /**adding all elements to a Array list named allElements **/
 
@@ -80,11 +98,46 @@ public class ReadPdfService {
          * decaring the index numbers to expBeging and expEnds **/
 
         for (int i = 0; i < listOfElements.size(); i++) {
+            if(listOfElements.get(i).text().equals("Contact") && extractStyleValues(listOfElements.get(i),1).matches("21.6pt"))
+                contactIndex = i;
+            if(listOfElements.get(i).text().equals("Top") && extractStyleValues(listOfElements.get(i),1).matches("21.6pt"))
+                topSkillsIndex = i;
             if (listOfElements.get(i).text().equals("Experience"))
                 expBegins = i;
             if (listOfElements.get(i).text().equals("Education")) {
                 expEnds = i;
                 break;
+            }
+        }
+
+        for(int i = contactIndex;i<=expBegins;i++){
+            Element element = allElements.get(i);
+            Element previousElement = allElements.get(i-1);
+            String style = element.attr("style");
+            String[] styleValues = style.split(";");
+            if (styleValues[0].startsWith("top") ) {
+                if(i<topSkillsIndex){
+                    if (extractStyleValues(element, 4).matches("10.5pt") && element.text().matches("\\w*@\\w*.com"))
+                        emailAddress = element.text();
+                    if (extractStyleValues(element, 4).matches("11.0pt") && extractStyleValues(element,5).matches("#ffffff"))
+                        linkedinProfileLink += element.text();
+                }
+                if (extractStyleValues(element, 4).matches("26.0pt"))
+                    profileName += element.text() + " ";
+                if(extractStyleValues(element,4).matches("12.0pt") && extractStyleValues(element,5).matches("#181818")) {
+                    if (extractStyleValues(previousElement,4).matches("15.75pt"))
+                        currentPosition = currentPositionTemp;
+                    currentPositionTemp += element.text()+" ";
+                }
+                if(extractStyleValues(element,4).matches("12.0pt") && extractStyleValues(element,5).matches("#b0b0b0"))
+                    currentLocation += element.text() + " ";
+            }
+            if(i==expBegins){
+                profileDetails.put("profileName", removeLastWhiteSpace(profileName));
+                profileDetails.put("linkedinProfileLink", removeLastWhiteSpace(linkedinProfileLink));
+                profileDetails.put("emailAddress", removeLastWhiteSpace(emailAddress));
+                profileDetails.put("currentPosition", removeLastWhiteSpace(currentPosition));
+                profileDetails.put("currentLocation", removeLastWhiteSpace(currentLocation));
             }
         }
 
@@ -190,15 +243,15 @@ public class ReadPdfService {
 
                 if (hasOnlyServiceDuration) {
 
-                    String jsonString2 = new JSONObject()
-                            .put("company", mainCompany)
+                    JSONObject jsonString2 = new JSONObject();
+                            jsonString2.put("company", mainCompany);
 
-                            .put("timePeriod", jsonStringService.getShortDuration(mainTimeDuration))
+                            jsonString2.put("timePeriod", jsonStringService.getShortDuration(mainTimeDuration));
 
-                            .put("positions", positionsList)
-                            .toString();
+                            jsonString2.put("positions", positionsList);
 
-                    jsonOutput.add(jsonString2);
+
+                    experienceList.add(jsonString2);
 
                     hasOnlyServiceDuration = false;
 
@@ -209,13 +262,13 @@ public class ReadPdfService {
 
                 } else {
 
-                    String jsonString2 = new JSONObject()
-                            .put("company", company)
-                            .put("timePeriod", jsonStringService.getLongDuration(timePeriod))
-                            .put("positions", positionsList)
-                            .toString();
+                    JSONObject jsonString2 = new JSONObject();
+                            jsonString2.put("company", company);
+                            jsonString2.put("timePeriod", jsonStringService.getLongDuration(timePeriod));
+                            jsonString2.put("positions", positionsList);
 
-                    jsonOutput.add(jsonString2);
+
+                    experienceList.add(jsonString2);
 
                     positionsList.clear();
                 }
@@ -322,6 +375,24 @@ public class ReadPdfService {
         fileManageService.discardFiles(savedFileLocation);
         fileManageService.discardFiles(savedFileLocation.substring(0, savedFileLocation.length() - 4) + ".html");
 
-        return jsonOutput.toString();
+        jsonData.put("profile", profileDetails);
+        jsonData.put("experiences", experienceList);
+        finalJsonOutput.put("success", successResponse);
+        finalJsonOutput.put("data", jsonData);
+
+
+        return finalJsonOutput.toString();
+    }
+    private String extractStyleValues(Element element, int indexOfAttribute){
+        String style = element.attr("style");
+        String[] styleValues = style.split(";");
+        String styleValue = styleValues[indexOfAttribute];
+        String[] keyAndValuePair = styleValue.split(":");
+        return keyAndValuePair[1];
+    }
+    private String removeLastWhiteSpace(String string){
+        if (string != "" && string.charAt(string.length() - 1) == ' ')
+            string = string.substring(0, string.length() - 1);
+        return string;
     }
 }
