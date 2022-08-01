@@ -1,5 +1,6 @@
 package com.example.Project.Resume.Graph.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 @Service
 public class FileManageService {
-    public String getSavedFileLocation(MultipartFile file) throws IOException {
+        public String getSavedFileLocation(MultipartFile file) throws IOException {
         String savedFileLocation = "uploaded/"+ UUID.randomUUID().toString()+".pdf";
         File fileToSave = new File(savedFileLocation);
         fileToSave.getParentFile().mkdirs();

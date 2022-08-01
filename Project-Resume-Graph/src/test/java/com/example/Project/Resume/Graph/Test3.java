@@ -9,29 +9,16 @@ import java.util.regex.Pattern;
 
 public class Test3 {
     @Test
-    public void testing(){
+    public void testing() {
 
 
-        String duration = "1 year 11 months";
+        String file = "Profile (2).pdf";
 
-        Pattern pattern = Pattern.compile("((\\d*).years?.)?(\\d*).months?");
-        Matcher matcher = pattern.matcher(duration);
-        Boolean matchFound = matcher.find();
-
-        if(matchFound) {
-
-            System.out.println(matcher.group(1));
-            System.out.println(matcher.group(2));
-            System.out.println(matcher.group(3));
-
-        }
-
-
-
-
-
-
+        System.out.println(file.substring(file.length() - 4));
 
 
     }
+
+
+
 }
