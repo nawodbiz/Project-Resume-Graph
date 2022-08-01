@@ -269,16 +269,24 @@ public class ReadPdfService {
         finalJsonOutput.put("data", jsonData);
         return finalJsonOutput.toString();
     }
-    private String extractStyleValues(Element element, int indexOfAttribute){
+    public String extractStyleValues(Element element, int indexOfAttribute){
         String style = element.attr("style");
         String[] styleValues = style.split(";");
         String styleValue = styleValues[indexOfAttribute];
         String[] keyAndValuePair = styleValue.split(":");
         return keyAndValuePair[1];
     }
-    private String removeLastWhiteSpace(String string){
+    public String removeLastWhiteSpace(String string){
         if (string != "" && string.charAt(string.length() - 1) == ' ')
             string = string.substring(0, string.length() - 1);
         return string;
+    }
+    public String exceptionHandled(){
+        successResponse = false;
+        jsonData.put("profile", profileDetails);
+        jsonData.put("experiences", experienceList);
+        finalJsonOutput.put("success", successResponse);
+        finalJsonOutput.put("data", jsonData);
+        return finalJsonOutput.toString();
     }
 }

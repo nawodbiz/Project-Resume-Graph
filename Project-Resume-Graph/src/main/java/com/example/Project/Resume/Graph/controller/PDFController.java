@@ -8,9 +8,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class PDFController {
     @Autowired
     private ReadPdfService readPdfService;
+
     @PostMapping("/getExperiences")
     public String getExperiences(@RequestBody MultipartFile file) throws Exception {
-        String jsonOutput = readPdfService.extractExperiences(file);
+        String jsonOutput = "";
+        try {
+            jsonOutput = readPdfService.extractExperiences(file);
+        } catch (Exception e) {
+            return readPdfService.exceptionHandled();
+        }
         return jsonOutput;
     }
 }
