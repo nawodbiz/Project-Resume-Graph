@@ -70,10 +70,8 @@ public class ReadPdfService{
         new PDFDomTree().writeText(uploadedPdf, output);
         output.close();
         uploadedPdf.close();
-
         File input = new File(savedFileLocation.substring(0, savedFileLocation.length() - 4) + ".html");
         Document doc = Jsoup.parse(input, "UTF-8");
-
         Elements allElements = doc.getAllElements();
         /**adding all elements to a Array list named allElements **/
         for (Element element : allElements) {
@@ -122,8 +120,6 @@ public class ReadPdfService{
                 profileDetails.put("emailAddress", removeLastWhiteSpace(emailAddress));
                 profileDetails.put("currentPosition", removeLastWhiteSpace(currentPosition));
                 profileDetails.put("currentLocation", removeLastWhiteSpace(currentLocation));
-
-
             }
         }
         /**
@@ -188,13 +184,11 @@ public class ReadPdfService{
                 jsonStringChild.put("time duration", jsonStringService.getLongDuration(timePeriod));
                 jsonStringChild.put("description", description);
                 positionsList.add(jsonStringChild);
-
                 if (hasOnlyServiceDuration) {
                     JSONObject jsonStringParent = new JSONObject();
                     jsonStringParent.put("company", companyWithMorePositions);
                     jsonStringParent.put("timePeriod", jsonStringService.getShortDuration(timePeriodWithMorePositions,true));
                     jsonStringParent.put("positions", positionsList);
-
                     experienceList.add(jsonStringParent);
                     hasOnlyServiceDuration = false;
                     companyWithMorePositions = "";
