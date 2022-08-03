@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
@@ -18,7 +19,8 @@ import java.util.regex.Pattern;
 
 @Service
 @Data
-public class ReadPdfService {
+public class ReadPdfService{
+
     @Autowired
     FileManageService fileManageService;
     @Autowired
@@ -49,6 +51,18 @@ public class ReadPdfService {
     String emailAddress = "";
     String linkedinProfileLink = "";
     Boolean successResponse = true;
+    @Value("${profileNameFontSize}")
+    String profileNameFontSize;
+    @Value("${companyNameFontSize}")
+    String companyNameFontSize;
+    @Value("${titleFontSize}")
+    String titleFontSize;
+    @Value("${commonSmallestFontSize}")
+    String commonSmallestFontSize;
+    @Value("${linkedInProfileFontSize}")
+    String linkedInProfileFontSize;
+    @Value("${ExperienceWordingFontSize}")
+    String ExperienceWordingFontSize;
     public String extractExperiences(MultipartFile file) throws IOException {
         String savedFileLocation = fileManageService.getSavedFileLocation(file);
         PDDocument uploadedPdf = PDDocument.load(new File(savedFileLocation));
@@ -87,19 +101,19 @@ public class ReadPdfService {
             String[] styleValues = style.split(";");
             if (styleValues[0].startsWith("top") ) {
                 if(i<topSkillsIndex){
-                    if (extractStyleValues(element, 4).matches("10.5pt") && element.text().matches("\\w*@\\w*.com"))
+                    if (extractStyleValues(element, 4).matches(commonSmallestFontSize) && element.text().matches("\\w*@\\w*.com"))
                         emailAddress = element.text();
-                    if (extractStyleValues(element, 4).matches("11.0pt") && extractStyleValues(element,5).matches("#ffffff"))
+                    if (extractStyleValues(element, 4).matches(linkedInProfileFontSize) && extractStyleValues(element,5).matches("#ffffff"))
                         linkedinProfileLink += element.text();
                 }
-                if (extractStyleValues(element, 4).matches("26.0pt"))
+                if (extractStyleValues(element, 4).matches(profileNameFontSize))
                     profileName += element.text() + " ";
-                if(extractStyleValues(element,4).matches("12.0pt") && extractStyleValues(element,5).matches("#181818")) {
-                    if (extractStyleValues(previousElement,4).matches("15.75pt"))
+                if(extractStyleValues(element,4).matches(companyNameFontSize) && extractStyleValues(element,5).matches("#181818")) {
+                    if (extractStyleValues(previousElement,4).matches(ExperienceWordingFontSize))
                         currentPosition = currentPositionTemp;
                     currentPositionTemp += element.text()+" ";
                 }
-                if(extractStyleValues(element,4).matches("12.0pt") && extractStyleValues(element,5).matches("#b0b0b0"))
+                if(extractStyleValues(element,4).matches(companyNameFontSize) && extractStyleValues(element,5).matches("#b0b0b0"))
                     currentLocation += element.text() + " ";
             }
             if(i==expBegins){
@@ -133,15 +147,15 @@ public class ReadPdfService {
          **/
         for (int i = 1; i < cleanListOfElements.size(); i++) {
             Element element = cleanListOfElements.get(i);
-            int styleFontSize = Integer.parseInt(extractStyleValues(cleanListOfElements.get(i),4).substring(0,2));
-            int previousElementStyleFontSize = Integer.parseInt(extractStyleValues(cleanListOfElements.get(i - 1),4).substring(0,2));
+            String styleFontSize = extractStyleValues(cleanListOfElements.get(i),4);
+            String previousElementStyleFontSize = extractStyleValues(cleanListOfElements.get(i - 1),4);
             String fontColor = extractStyleValues(cleanListOfElements.get(i),5);
             String previousElementFontSize = extractStyleValues(cleanListOfElements.get(i-1),5);
             if (i == 1)
                 company = cleanListOfElements.get(0).text();
-            if (styleFontSize == 10 && i == cleanListOfElements.size() - 1)
+            if (styleFontSize.matches(commonSmallestFontSize) && i == cleanListOfElements.size() - 1)
                 description += element.text();
-            if ((styleFontSize == 12 && previousElementStyleFontSize == 10) || i == cleanListOfElements.size() - 1) {
+            if ((styleFontSize.matches(companyNameFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize)) || i == cleanListOfElements.size() - 1) {
                 if (location.isEmpty()) {
                     Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.years?)?.\\d*.months?\\)");
                     Matcher matcher = pattern.matcher(description);
@@ -200,13 +214,13 @@ public class ReadPdfService {
                 timePeriod = "";
                 location = "";
             }
-            if (styleFontSize == 11 && previousElementStyleFontSize == 10 && title.isEmpty() && timePeriod.isEmpty()) {
+            if (styleFontSize.matches(titleFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize) && title.isEmpty() && timePeriod.isEmpty()) {
                 companyWithMorePositions = company;
                 timePeriodWithMorePositions = description;
                 description = "";
                 hasOnlyServiceDuration = true;
             }
-            if (styleFontSize == 11 && previousElementStyleFontSize == 10 && !title.isEmpty()) {
+            if (styleFontSize.matches(titleFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize) && !title.isEmpty()) {
                 if (location.isEmpty()) {
                     Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.year)?.\\d*.months?\\)");
                     Matcher matcher = pattern.matcher(description);
@@ -245,16 +259,16 @@ public class ReadPdfService {
                 timePeriod = "";
                 location = "";
             }
-            if (styleFontSize == 12) {
+            if (styleFontSize.matches(companyNameFontSize)) {
                 company += element.text() + " ";
             }
-            if (styleFontSize == 11) {
+            if (styleFontSize.matches(titleFontSize)) {
                 title += element.text() + " ";
             }
-            if (styleFontSize == 10 && fontColor.matches("#b0b0b0")) {
+            if (styleFontSize.matches(commonSmallestFontSize) && fontColor.matches("#b0b0b0")) {
                 location += location + " ";
             }
-            if (styleFontSize == 10 && fontColor.matches("#181818")) {
+            if (styleFontSize.matches(commonSmallestFontSize) && fontColor.matches("#181818")) {
                 if (previousElementFontSize.matches("#b0b0b0")) {
                     timePeriod = description;
                     description = "";

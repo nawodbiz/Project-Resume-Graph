@@ -1,6 +1,4 @@
 package com.example.Project.Resume.Graph.errors;
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.json.JSONObject;
