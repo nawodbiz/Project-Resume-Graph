@@ -108,6 +108,8 @@ public class ReadPdfService {
                 profileDetails.put("emailAddress", removeLastWhiteSpace(emailAddress));
                 profileDetails.put("currentPosition", removeLastWhiteSpace(currentPosition));
                 profileDetails.put("currentLocation", removeLastWhiteSpace(currentLocation));
+
+
             }
         }
         /**
@@ -262,7 +264,6 @@ public class ReadPdfService {
         }
         fileManageService.discardFiles(savedFileLocation);
         fileManageService.discardFiles(savedFileLocation.substring(0, savedFileLocation.length() - 4) + ".html");
-
         jsonData.put("profile", profileDetails);
         jsonData.put("experiences", experienceList);
         finalJsonOutput.put("success", successResponse);
@@ -280,13 +281,5 @@ public class ReadPdfService {
         if (string != "" && string.charAt(string.length() - 1) == ' ')
             string = string.substring(0, string.length() - 1);
         return string;
-    }
-    public String exceptionHandled(){
-        successResponse = false;
-        jsonData.put("profile", profileDetails);
-        jsonData.put("experiences", experienceList);
-        finalJsonOutput.put("success", successResponse);
-        finalJsonOutput.put("data", jsonData);
-        return finalJsonOutput.toString();
     }
 }
