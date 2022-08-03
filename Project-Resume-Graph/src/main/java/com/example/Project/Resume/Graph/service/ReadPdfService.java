@@ -244,15 +244,11 @@ public class ReadPdfService{
                     timePeriod = description;
                     description = "";
                 }
-                company = removeLastWhiteSpace(company);
-                title = removeLastWhiteSpace(title);
-                timePeriod = removeLastWhiteSpace(timePeriod);
-                description = removeLastWhiteSpace(description);
                 JSONObject jsonStringChild = new JSONObject();
-                jsonStringChild.put("company", company);
-                jsonStringChild.put("title", title);
-                jsonStringChild.put("time period", jsonStringService.getLongDuration(timePeriod));
-                jsonStringChild.put("description", description);
+                jsonStringChild.put("company", removeLastWhiteSpace(company));
+                jsonStringChild.put("title", removeLastWhiteSpace(title));
+                jsonStringChild.put("time period", jsonStringService.getLongDuration(removeLastWhiteSpace(timePeriod)));
+                jsonStringChild.put("description", removeLastWhiteSpace(description));
                 positionsList.add(jsonStringChild);
                 title = "";
                 description = "";
