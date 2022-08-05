@@ -107,8 +107,10 @@ public class ReadPdfService{
                 if (extractStyleValues(element, 4).matches(profileNameFontSize))
                     profileName += element.text() + " ";
                 if(extractStyleValues(element,4).matches(companyNameFontSize) && extractStyleValues(element,5).matches("#181818")) {
-                    if (extractStyleValues(previousElement,4).matches(ExperienceWordingFontSize))
+                    if (extractStyleValues(previousElement,4).matches(ExperienceWordingFontSize)){
                         currentPosition = currentPositionTemp;
+                        currentPositionTemp="";
+                    }
                     currentPositionTemp += element.text()+" ";
                 }
                 if(extractStyleValues(element,4).matches(companyNameFontSize) && extractStyleValues(element,5).matches("#b0b0b0"))
@@ -120,6 +122,12 @@ public class ReadPdfService{
                 profileDetails.put("emailAddress", removeLastWhiteSpace(emailAddress));
                 profileDetails.put("currentPosition", removeLastWhiteSpace(currentPosition));
                 profileDetails.put("currentLocation", removeLastWhiteSpace(currentLocation));
+                profileName="";
+                linkedinProfileLink="";
+                emailAddress="";
+                currentPosition="";
+                currentLocation="";
+                currentPositionTemp="";
             }
         }
         /**
@@ -181,13 +189,17 @@ public class ReadPdfService{
                 JSONObject jsonStringChild = new JSONObject();
                 jsonStringChild.put("company", company);
                 jsonStringChild.put("title", title);
-                jsonStringChild.put("time duration", jsonStringService.getLongDuration(timePeriod));
+                jsonStringChild.put("time period", jsonStringService.getLongDuration(timePeriod));
                 jsonStringChild.put("description", description);
                 positionsList.add(jsonStringChild);
                 if (hasOnlyServiceDuration) {
+                    JSONObject totalTimePeriod = new JSONObject();
+                    totalTimePeriod.put("duration", jsonStringService.getShortDuration(timePeriodWithMorePositions,true));
+                    totalTimePeriod.put("starting",positionsList.get(positionsList.size()-1).getJSONObject("time period").getJSONObject("starting"));
+                    totalTimePeriod.put("ending",positionsList.get(0).getJSONObject("time period").getJSONObject("ending"));
                     JSONObject jsonStringParent = new JSONObject();
                     jsonStringParent.put("company", companyWithMorePositions);
-                    jsonStringParent.put("timePeriod", jsonStringService.getShortDuration(timePeriodWithMorePositions,true));
+                    jsonStringParent.put("timePeriod", totalTimePeriod);
                     jsonStringParent.put("positions", positionsList);
                     experienceList.add(jsonStringParent);
                     hasOnlyServiceDuration = false;
@@ -219,7 +231,6 @@ public class ReadPdfService{
                     Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.year)?.\\d*.months?\\)");
                     Matcher matcher = pattern.matcher(description);
                     Boolean matchFound = matcher.find();
-
                     if (matchFound) {
                         timePeriod = matcher.group(0);
                         description = description.substring(timePeriod.length(), description.length() - 1);
@@ -272,6 +283,10 @@ public class ReadPdfService{
         jsonData.put("experiences", experienceList);
         finalJsonOutput.put("success", successResponse);
         finalJsonOutput.put("data", jsonData);
+        listOfElements.clear();
+        cleanListOfElements.clear();
+        experienceList.clear();
+        positionsList.clear();
         return finalJsonOutput.toString();
     }
     public String extractStyleValues(Element element, int indexOfAttribute){

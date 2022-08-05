@@ -26,11 +26,21 @@ public class PDFController {
     private ResponseHandling responseHandling;
     @PostMapping("/getExperiences")
     public String getExperiences(@RequestBody MultipartFile file) throws Exception {
-        Boolean isTrue = responseHandling.handleTheResponse(file);
-        if(isTrue) {
-            return new ReadPdfService().getFinalJsonOutput().toString();
-        }else{
-            return new ApiException(false,ResponseHandling.message, HttpStatus.BAD_REQUEST).getJsonObject().toString();
+//        Boolean isTrue = responseHandling.handleTheResponse(file);
+//        if(isTrue) {
+//            return new ReadPdfService().getFinalJsonOutput().toString();
+//        }else{
+//            return new ApiException(false,ResponseHandling.message, HttpStatus.BAD_REQUEST).getJsonObject().toString();
+//        }
+
+        try{
+            return readPdfService.extractExperiences(file);
+        }catch (Exception e){
+            return new ApiException(false,e.getMessage(), HttpStatus.BAD_REQUEST).getJsonObject().toString();
+        }finally {
+            readPdfService.getFinalJsonOutput().clear();
+            readPdfService.getProfileDetails().clear();
+            readPdfService.getJsonData().clear();
         }
     }
 }
