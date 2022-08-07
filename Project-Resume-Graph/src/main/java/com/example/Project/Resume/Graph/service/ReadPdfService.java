@@ -50,6 +50,7 @@ public class ReadPdfService{
     String currentPositionTemp = "";
     String emailAddress = "";
     String linkedinProfileLink = "";
+    String linkedinProfileLinkTemp = "";
     Boolean successResponse = true;
     @Value("${profileNameFontSize}")
     String profileNameFontSize;
@@ -59,8 +60,8 @@ public class ReadPdfService{
     String titleFontSize;
     @Value("${commonSmallestFontSize}")
     String commonSmallestFontSize;
-    @Value("${linkedInProfileFontSize}")
-    String linkedInProfileFontSize;
+    @Value("${linkedInProfileLinkFontSize}")
+    String linkedInProfileLinkFontSize;
     @Value("${ExperienceWordingFontSize}")
     String ExperienceWordingFontSize;
     public String extractExperiences(MultipartFile file) throws IOException {
@@ -101,8 +102,11 @@ public class ReadPdfService{
                 if(i<topSkillsIndex){
                     if (extractStyleValues(element, 4).matches(commonSmallestFontSize) && element.text().matches("\\w*@\\w*.com"))
                         emailAddress = element.text();
-                    if (extractStyleValues(element, 4).matches(linkedInProfileFontSize) && extractStyleValues(element,5).matches("#ffffff"))
-                        linkedinProfileLink += element.text();
+                    if (extractStyleValues(element, 4).matches(linkedInProfileLinkFontSize)) {
+                        if (extractStyleValues(element, 4).matches(linkedInProfileLinkFontSize) && element.text().matches("\\(LinkedIn\\)"))
+                            linkedinProfileLink = linkedinProfileLinkTemp;
+                        linkedinProfileLinkTemp += element.text();
+                    }
                 }
                 if (extractStyleValues(element, 4).matches(profileNameFontSize))
                     profileName += element.text() + " ";
