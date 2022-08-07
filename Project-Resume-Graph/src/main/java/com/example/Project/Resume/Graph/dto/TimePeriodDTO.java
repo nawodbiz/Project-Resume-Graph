@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TimePeriodDTO {
     private DurationDTO duration;
-//    private EndingMonthDTO ending;
+    private EndingMonthDTO ending;
     private StartingMonthDTO starting;
 }

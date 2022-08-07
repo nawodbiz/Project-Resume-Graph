@@ -29,8 +29,12 @@ public class JsonStringService {
         if(matchFound){
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("starting", getShortDuration(matcher.group(1),false));
-            if(getShortDuration(matcher.group(2),false)==null)
-                jsonObject.put("ending","present");
+            if(getShortDuration(matcher.group(2),false)==null){
+                JSONObject presentEndingStructure = new JSONObject();
+                presentEndingStructure.put("year", "present");
+                presentEndingStructure.put("month","present");
+                jsonObject.put("ending", presentEndingStructure);
+            }
             else
                 jsonObject.put("ending", getShortDuration(matcher.group(2),false));
             jsonObject.put("duration", getShortDuration(matcher.group(3),true));

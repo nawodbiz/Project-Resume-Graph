@@ -11,5 +11,5 @@ import java.util.List;
 @NoArgsConstructor
 public class DataDTO {
     private ProfileDTO profile;
-//    private List<ExperienceDTO> experiences;
+    private List<ExperienceDTO> experiences;
 }

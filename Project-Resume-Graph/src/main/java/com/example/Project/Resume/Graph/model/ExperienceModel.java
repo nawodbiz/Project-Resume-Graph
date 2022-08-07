@@ -17,7 +17,7 @@ public class ExperienceModel {
     @Column(name="id")
     private long id;
     private String company;
-    private YearMonth duration;
-    private YearMonth starting;
-    private YearMonth ending;
+    private String duration;
+    private String starting;
+    private String ending;
 }

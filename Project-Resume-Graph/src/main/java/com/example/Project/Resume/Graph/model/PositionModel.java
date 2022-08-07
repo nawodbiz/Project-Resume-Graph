@@ -18,8 +18,8 @@ public class PositionModel {
     private long id;
     private String company;
     private String title;
-    private YearMonth duration;
-    private YearMonth starting;
-    private YearMonth ending;
+    private String duration;
+    private String starting;
+    private String ending;
     private String description;
 }

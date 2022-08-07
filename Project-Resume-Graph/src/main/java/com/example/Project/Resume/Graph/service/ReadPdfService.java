@@ -193,14 +193,14 @@ public class ReadPdfService{
                 JSONObject jsonStringChild = new JSONObject();
                 jsonStringChild.put("company", company);
                 jsonStringChild.put("title", title);
-                jsonStringChild.put("time period", jsonStringService.getLongDuration(timePeriod));
+                jsonStringChild.put("timePeriod", jsonStringService.getLongDuration(timePeriod));
                 jsonStringChild.put("description", description);
                 positionsList.add(jsonStringChild);
                 if (hasOnlyServiceDuration) {
                     JSONObject totalTimePeriod = new JSONObject();
                     totalTimePeriod.put("duration", jsonStringService.getShortDuration(timePeriodWithMorePositions,true));
-                    totalTimePeriod.put("starting",positionsList.get(positionsList.size()-1).getJSONObject("time period").getJSONObject("starting"));
-                    totalTimePeriod.put("ending",positionsList.get(0).getJSONObject("time period").getJSONObject("ending"));
+                    totalTimePeriod.put("starting",positionsList.get(positionsList.size()-1).getJSONObject("timePeriod").getJSONObject("starting"));
+                    totalTimePeriod.put("ending",positionsList.get(0).getJSONObject("timePeriod").getJSONObject("ending"));
                     JSONObject jsonStringParent = new JSONObject();
                     jsonStringParent.put("company", companyWithMorePositions);
                     jsonStringParent.put("timePeriod", totalTimePeriod);
@@ -256,7 +256,7 @@ public class ReadPdfService{
                 JSONObject jsonStringChild = new JSONObject();
                 jsonStringChild.put("company", removeLastWhiteSpace(company));
                 jsonStringChild.put("title", removeLastWhiteSpace(title));
-                jsonStringChild.put("time period", jsonStringService.getLongDuration(removeLastWhiteSpace(timePeriod)));
+                jsonStringChild.put("timePeriod", jsonStringService.getLongDuration(removeLastWhiteSpace(timePeriod)));
                 jsonStringChild.put("description", removeLastWhiteSpace(description));
                 positionsList.add(jsonStringChild);
                 title = "";
