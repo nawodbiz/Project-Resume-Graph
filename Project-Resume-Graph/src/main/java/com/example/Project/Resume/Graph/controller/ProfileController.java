@@ -1,19 +1,18 @@
 package com.example.Project.Resume.Graph.controller;
+import com.example.Project.Resume.Graph.dao.ProfileRepository;
 import com.example.Project.Resume.Graph.dto.JsonResponseDTO;
 import com.example.Project.Resume.Graph.errors.ApiException;
 import com.example.Project.Resume.Graph.model.ExperienceModel;
 import com.example.Project.Resume.Graph.model.PositionModel;
 import com.example.Project.Resume.Graph.model.ProfileModel;
+import com.example.Project.Resume.Graph.service.FindFromDBService;
 import com.example.Project.Resume.Graph.service.ReadPdfService;
 import com.example.Project.Resume.Graph.service.SaveToDBService;
 import com.example.Project.Resume.Graph.util.StartupUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
@@ -26,7 +25,9 @@ public class ProfileController {
     private SaveToDBService saveToDBService;
     @Autowired
     private StartupUtility startupUtility;
-    @PostMapping
+    @Autowired
+    private FindFromDBService findFromDBService;
+    @PostMapping("/save")
     public String saveProfileData(@RequestBody MultipartFile file) throws JsonProcessingException {
         String jsonResponse;
         try{
@@ -52,5 +53,13 @@ public class ProfileController {
             return "failed to save data";
         }
         return "saved successfully";
+    }
+    @GetMapping("/getAllProfiles")
+    public List<ProfileModel> getAllProfiles(){
+        return findFromDBService.profileList();
+    }
+    @GetMapping("/getProfile")
+    public ProfileModel getSelectedProfile(@RequestParam String profileName){
+        return findFromDBService.findByProfileName(profileName);
     }
 }
