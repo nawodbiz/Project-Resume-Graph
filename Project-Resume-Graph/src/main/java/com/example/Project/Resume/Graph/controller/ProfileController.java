@@ -1,5 +1,4 @@
 package com.example.Project.Resume.Graph.controller;
-import com.example.Project.Resume.Graph.dto.ExperienceDTO;
 import com.example.Project.Resume.Graph.dto.JsonResponseDTO;
 import com.example.Project.Resume.Graph.errors.ApiException;
 import com.example.Project.Resume.Graph.model.ExperienceModel;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 @RestController
@@ -29,7 +27,7 @@ public class ProfileController {
     @Autowired
     private StartupUtility startupUtility;
     @PostMapping
-    public ProfileModel saveProfileData(@RequestBody MultipartFile file) throws JsonProcessingException {
+    public String saveProfileData(@RequestBody MultipartFile file) throws JsonProcessingException {
         String jsonResponse;
         try{
             jsonResponse = readPdfService.extractExperiences(file);
@@ -40,14 +38,19 @@ public class ProfileController {
             readPdfService.getProfileDetails().clear();
             readPdfService.getJsonData().clear();
         }
-        JsonResponseDTO jsonResponseDTO = StartupUtility.objectMapper.readValue(jsonResponse,JsonResponseDTO.class);
-        ProfileModel profileData = saveToDBService.assignProfileData(jsonResponseDTO.getData().getProfile());
-        List<ExperienceModel> experiencedata = saveToDBService.assignExperienceData(jsonResponseDTO.getData().getExperiences());
-        saveToDBService.saveExperienceListToDB(experiencedata);
-        for(ExperienceDTO selectedExperience: jsonResponseDTO.getData().getExperiences()){
-            List<PositionModel> positionsData = saveToDBService.assignPositionData(selectedExperience.getPositions());
-            saveToDBService.savePositionListToDB(positionsData);
+        try{
+            JsonResponseDTO jsonResponseDTO = StartupUtility.objectMapper.readValue(jsonResponse,JsonResponseDTO.class);
+            ProfileModel profileData = saveToDBService.assignProfileData(jsonResponseDTO.getData().getProfile());
+            List<ExperienceModel> experienceData = saveToDBService.assignExperienceData(jsonResponseDTO.getData().getExperiences());
+            for(int i=0;i<experienceData.size();i++){
+
+                List<PositionModel> positionModelList = saveToDBService.assignPositionData(jsonResponseDTO.getData().getExperiences().get(i).getPositions());
+                experienceData.get(i).setPositions(positionModelList);
+            }
+            saveToDBService.saveProfileToDB(profileData,experienceData);
+        }catch (Exception e){
+            return "failed to save data";
         }
-        return saveToDBService.saveProfileToDB(profileData);
+        return "saved successfully";
     }
 }

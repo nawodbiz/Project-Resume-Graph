@@ -1,7 +1,6 @@
 package com.example.Project.Resume.Graph.service;
 
 import com.example.Project.Resume.Graph.dao.ExperienceRepository;
-import com.example.Project.Resume.Graph.dao.PositionRepository;
 import com.example.Project.Resume.Graph.dao.ProfileRepository;
 import com.example.Project.Resume.Graph.dto.ExperienceDTO;
 import com.example.Project.Resume.Graph.dto.PositionDTO;
@@ -9,23 +8,23 @@ import com.example.Project.Resume.Graph.dto.ProfileDTO;
 import com.example.Project.Resume.Graph.model.ExperienceModel;
 import com.example.Project.Resume.Graph.model.PositionModel;
 import com.example.Project.Resume.Graph.model.ProfileModel;
-import com.example.Project.Resume.Graph.util.StartupUtility;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hibernate.tool.schema.SchemaToolingLogging.LOGGER;
 @Service
 public class SaveToDBService {
     @Autowired
     private ProfileRepository profileRepository;
     @Autowired
     private ExperienceRepository experienceRepository;
-    @Autowired
-    private PositionRepository positionRepository;
-    public ProfileModel saveProfileToDB (ProfileModel profileModel){
+    public ProfileModel saveProfileToDB (ProfileModel profileModel, List<ExperienceModel> experienceModelList){
+        for(ExperienceModel experienceModel: experienceModelList){
+            profileModel.getExperiences().add(experienceModel);
+        }
         return this.profileRepository.save(profileModel);
     }
     public ProfileModel assignProfileData (ProfileDTO profileDTO){
@@ -37,7 +36,7 @@ public class SaveToDBService {
             profileModel.setCurrentLocation(profileDTO.getCurrentLocation() == "" ? null : profileDTO.getCurrentLocation());
             profileModel.setEmailAddress(profileDTO.getEmailAddress() == "" ? null : profileDTO.getEmailAddress());
         }catch (Exception e){
-            LOGGER.error(String.format("exception at class SavingDBService, SavingDBService method: %1$s", e));
+            System.out.println(e);
         }
         return profileModel;
     }
@@ -50,18 +49,18 @@ public class SaveToDBService {
             ExperienceModel experienceModel = new ExperienceModel();
             try{
                 experienceModel.setCompany(experienceDTO.getCompany());
-                experienceModel.setDuration(experienceDTO.getTimePeriod().getDuration().toString());
-                experienceModel.setStarting(experienceDTO.getTimePeriod().getStarting().toString());
-                experienceModel.setEnding(experienceDTO.getTimePeriod().getEnding().toString());
+                experienceModel.setDurationMonth(experienceDTO.getTimePeriod().getDuration().getMonth());
+                experienceModel.setDurationYear(experienceDTO.getTimePeriod().getDuration().getYear());
+                experienceModel.setStartingMonth(experienceDTO.getTimePeriod().getStarting().getMonth());
+                experienceModel.setStartingYear(experienceDTO.getTimePeriod().getStarting().getYear());
+                experienceModel.setEndingMonth(experienceDTO.getTimePeriod().getEnding().getMonth());
+                experienceModel.setEndingYear(experienceDTO.getTimePeriod().getEnding().getYear());
                 experienceModelList.add(experienceModel);
             }catch (Exception e){
-                LOGGER.error(String.format("exception at class Save To DB, assignExperienceData method : %1$s", e));
+                System.out.println(e);
             }
         }
         return experienceModelList;
-    }
-    public List<PositionModel> savePositionListToDB (List<PositionModel> positionModelList){
-        return positionRepository.saveAll(positionModelList);
     }
     public List<PositionModel> assignPositionData(List<PositionDTO> positionDTOList){
         List<PositionModel> positionModelList = new ArrayList<>();
@@ -71,12 +70,15 @@ public class SaveToDBService {
                 positionModel.setCompany(positionDTO.getCompany());
                 positionModel.setTitle(positionDTO.getTitle());
                 positionModel.setDescription(positionDTO.getDescription() == "" ? null : positionDTO.getDescription());
-                positionModel.setDuration("month : " + positionDTO.getTimePeriod().getDuration().getMonth() +", year : "+positionDTO.getTimePeriod().getDuration().getYear());
-                positionModel.setStarting("month : " + positionDTO.getTimePeriod().getStarting().getMonth() +", year : "+positionDTO.getTimePeriod().getStarting().getYear());
-                positionModel.setEnding("month : " + positionDTO.getTimePeriod().getEnding().getMonth() +", year : "+positionDTO.getTimePeriod().getEnding().getYear());
+                positionModel.setDurationMonth(positionDTO.getTimePeriod().getDuration().getMonth());
+                positionModel.setDurationYear(positionDTO.getTimePeriod().getDuration().getYear());
+                positionModel.setStartingMonth(positionDTO.getTimePeriod().getStarting().getMonth());
+                positionModel.setStartingYear(positionDTO.getTimePeriod().getStarting().getYear());
+                positionModel.setEndingMonth(positionDTO.getTimePeriod().getEnding().getMonth());
+                positionModel.setEndingYear(positionDTO.getTimePeriod().getEnding().getYear());
                 positionModelList.add(positionModel);
             }catch (Exception e){
-                LOGGER.error(String.format("exception at class Save To DB, assignPositionData method : %1$s", e));
+                System.out.println(e);
             }
         }
         return positionModelList;
