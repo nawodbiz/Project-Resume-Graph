@@ -78,9 +78,7 @@ public class ReadPdfService{
         for (Element element : allElements) {
             listOfElements.add(element);
         }
-        /** idetifying the required elements by capturing Experience and Education keyword as the index number of the arrayList of allElements ,
-         *
-         * decaring the index numbers to expBeging and expEnds **/
+        /** idetifying some key words with other relevant properties to break the loop for the ease of use**/
         for (int i = 0; i < listOfElements.size(); i++) {
             if(listOfElements.get(i).text().equals("Contact") && extractStyleValues(listOfElements.get(i),1).matches("21.6pt"))
                 contactIndex = i;
@@ -93,6 +91,7 @@ public class ReadPdfService{
                 break;
             }
         }
+        /**take the loop between contact details and start of the experience list*/
         for(int i = contactIndex;i<=expBegins;i++){
             Element element = allElements.get(i);
             Element previousElement = allElements.get(i-1);
@@ -120,6 +119,7 @@ public class ReadPdfService{
                 if(extractStyleValues(element,4).matches(companyNameFontSize) && extractStyleValues(element,5).matches("#b0b0b0"))
                     currentLocation += element.text() + " ";
             }
+            /**removing un unnecessary last white spaces and adding extracted values for a new json object*/
             if(i==expBegins){
                 profileDetails.put("profileName", removeLastWhiteSpace(profileName));
                 profileDetails.put("linkedinProfileLink", removeLastWhiteSpace(linkedinProfileLink));
@@ -135,10 +135,8 @@ public class ReadPdfService{
             }
         }
         /**
-         *  remove unnecessary elements from the captured middle content
-         * capturing styles and splitting them into pieces
-         * like not having index 4 of String lists and font size 9 removed
-         * adding to new list named cleanListOfElements for the ease
+         *  remove un wanted elements from the loop with some identified properties for avoiding getting errors while next operations and
+         *  adding them to a new list called cleanList
          **/
         for (int i = expBegins + 1; i < expEnds; i++) {
             Element element = allElements.get(i);
@@ -151,9 +149,10 @@ public class ReadPdfService{
             }
         }
         /**
-         * seperating the captured content into experiences one by one
+         * repeat the same pattern with font sizes on each experience and saving into lists
          **/
-        for (int i = 1; i < cleanListOfElements.size(); i++) {
+        int cleanListElementsArraySize = cleanListOfElements.size();
+        for (int i = 1; i <cleanListElementsArraySize; i++) {
             Element element = cleanListOfElements.get(i);
             String styleFontSize = extractStyleValues(cleanListOfElements.get(i),4);
             String previousElementStyleFontSize = extractStyleValues(cleanListOfElements.get(i - 1),4);
@@ -163,6 +162,7 @@ public class ReadPdfService{
                 company = cleanListOfElements.get(0).text();
             if (styleFontSize.matches(commonSmallestFontSize) && i == cleanListOfElements.size() - 1)
                 description += element.text();
+            /**compare current element font size and previous element font size and identify each experience with company name font size*/
             if ((styleFontSize.matches(companyNameFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize)) || i == cleanListOfElements.size() - 1) {
                 if (location.isEmpty()) {
                     Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.years?)?.\\d*.months?\\)");
@@ -196,6 +196,7 @@ public class ReadPdfService{
                 jsonStringChild.put("timePeriod", jsonStringService.getLongDuration(timePeriod));
                 jsonStringChild.put("description", description);
                 positionsList.add(jsonStringChild);
+                /**identifying the pattern with only having service duration, which having several positions company details*/
                 if (hasOnlyServiceDuration) {
                     JSONObject totalTimePeriod = new JSONObject();
                     totalTimePeriod.put("duration", jsonStringService.getShortDuration(timePeriodWithMorePositions,true));
@@ -224,12 +225,14 @@ public class ReadPdfService{
                 timePeriod = "";
                 location = "";
             }
+            /**identifying the pattern with only having service duration, which having several positions company details*/
             if (styleFontSize.matches(titleFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize) && title.isEmpty() && timePeriod.isEmpty()) {
                 companyWithMorePositions = company;
                 timePeriodWithMorePositions = description;
                 description = "";
                 hasOnlyServiceDuration = true;
             }
+            /**identify the position from several positions under one company name*/
             if (styleFontSize.matches(titleFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize) && !title.isEmpty()) {
                 if (location.isEmpty()) {
                     Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.year)?.\\d*.months?\\)");
@@ -281,6 +284,7 @@ public class ReadPdfService{
                 description += element.text() + " ";
             }
         }
+        /**discard saved pdf and html, creating the final response with profile and experience objects in data object*/
         fileManageService.discardFiles(savedFileLocation);
         fileManageService.discardFiles(savedFileLocation.substring(0, savedFileLocation.length() - 4) + ".html");
         jsonData.put("profile", profileDetails);
@@ -293,6 +297,7 @@ public class ReadPdfService{
         positionsList.clear();
         return finalJsonOutput.toString();
     }
+    /**get the style property and split that from ";" and get the style attribute value*/
     public String extractStyleValues(Element element, int indexOfAttribute){
         String style = element.attr("style");
         String[] styleValues = style.split(";");
@@ -300,8 +305,9 @@ public class ReadPdfService{
         String[] keyAndValuePair = styleValue.split(":");
         return keyAndValuePair[1];
     }
+    /**remove unnecessary white spaces in the end of strings*/
     public String removeLastWhiteSpace(String string){
-        if (string != "" && string.charAt(string.length() - 1) == ' ')
+        if (string.length() != 0 && string.charAt(string.length() - 1) == ' ')
             string = string.substring(0, string.length() - 1);
         return string;
     }

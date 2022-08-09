@@ -14,15 +14,9 @@ public class PDFController {
     private ReadPdfService readPdfService;
     @Autowired
     private ResponseHandling responseHandling;
+    /**upload the pdf and get the json response*/
     @PostMapping("/getExperiences")
     public String getExperiences(@RequestBody MultipartFile file) throws Exception {
-//        Boolean isTrue = responseHandling.handleTheResponse(file);
-//        if(isTrue) {
-//            return new ReadPdfService().getFinalJsonOutput().toString();
-//        }else{
-//            return new ApiException(false,ResponseHandling.message, HttpStatus.BAD_REQUEST).getJsonObject().toString();
-//        }
-
         try{
             return readPdfService.extractExperiences(file);
         }catch (Exception e){

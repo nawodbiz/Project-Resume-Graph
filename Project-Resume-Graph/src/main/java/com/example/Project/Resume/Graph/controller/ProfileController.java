@@ -1,5 +1,4 @@
 package com.example.Project.Resume.Graph.controller;
-import com.example.Project.Resume.Graph.dao.ProfileRepository;
 import com.example.Project.Resume.Graph.dto.JsonResponseDTO;
 import com.example.Project.Resume.Graph.errors.ApiException;
 import com.example.Project.Resume.Graph.model.ExperienceModel;
@@ -27,6 +26,7 @@ public class ProfileController {
     private StartupUtility startupUtility;
     @Autowired
     private FindFromDBService findFromDBService;
+    /**upload the json data into database*/
     @PostMapping("/save")
     public String saveProfileData(@RequestBody MultipartFile file) throws JsonProcessingException {
         String jsonResponse;
@@ -54,12 +54,14 @@ public class ProfileController {
         }
         return "saved successfully";
     }
+    /**get all saved profiles from the db*/
     @GetMapping("/getAllProfiles")
     public List<ProfileModel> getAllProfiles(){
         return findFromDBService.profileList();
     }
+    /**get data for a specific name from the db*/
     @GetMapping("/getProfile")
-    public ProfileModel getSelectedProfile(@RequestParam String profileName){
-        return findFromDBService.findByProfileName(profileName);
+    public ProfileModel getSelectedProfile(@RequestBody ProfileModel profileModel){
+        return findFromDBService.findByProfileName(profileModel.getProfileName());
     }
 }

@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 @Service
 public class JsonStringService {
+    /**extract the time period string to months and years and adding them into a new json object*/
     public JSONObject getShortDuration(String duration, Boolean isADuration){
         Pattern pattern = Pattern.compile("([A-Za-z]*)\\s(\\d*)");
         int i = 1;
@@ -22,6 +23,7 @@ public class JsonStringService {
         }else
             return null;
     }
+    /**extract the time period full property and assign them to starting and ending and duration assign them into new json object*/
     public JSONObject getLongDuration(String duration){
         Pattern pattern = Pattern.compile("([A-Za-z]*.\\d{4}).-.([A-Za-z]*.\\d{4}|Present).\\(((\\d*.years?)?.\\d*.months?)\\)");
         Matcher matcher = pattern.matcher(duration);
