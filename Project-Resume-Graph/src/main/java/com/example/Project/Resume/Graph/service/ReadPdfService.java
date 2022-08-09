@@ -79,7 +79,8 @@ public class ReadPdfService{
             listOfElements.add(element);
         }
         /** idetifying some key words with other relevant properties to break the loop for the ease of use**/
-        for (int i = 0; i < listOfElements.size(); i++) {
+        int sizeOfListOfElements = listOfElements.size();
+        for (int i = 0; i < sizeOfListOfElements; i++) {
             if(listOfElements.get(i).text().equals("Contact") && extractStyleValues(listOfElements.get(i),1).matches("21.6pt"))
                 contactIndex = i;
             if(listOfElements.get(i).text().equals("Top") && extractStyleValues(listOfElements.get(i),1).matches("21.6pt"))
@@ -121,17 +122,14 @@ public class ReadPdfService{
             }
             /**removing un unnecessary last white spaces and adding extracted values for a new json object*/
             if(i==expBegins){
-                profileDetails.put("profileName", removeLastWhiteSpace(profileName));
-                profileDetails.put("linkedinProfileLink", removeLastWhiteSpace(linkedinProfileLink));
-                profileDetails.put("emailAddress", removeLastWhiteSpace(emailAddress));
-                profileDetails.put("currentPosition", removeLastWhiteSpace(currentPosition));
-                profileDetails.put("currentLocation", removeLastWhiteSpace(currentLocation));
+                saveProfileDetailsIntoJson(profileName,linkedinProfileLink,emailAddress,currentPosition,currentLocation);
                 profileName="";
                 linkedinProfileLink="";
                 emailAddress="";
                 currentPosition="";
                 currentLocation="";
                 currentPositionTemp="";
+                linkedinProfileLinkTemp="";
             }
         }
         /**
@@ -165,59 +163,23 @@ public class ReadPdfService{
             /**compare current element font size and previous element font size and identify each experience with company name font size*/
             if ((styleFontSize.matches(companyNameFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize)) || i == cleanListOfElements.size() - 1) {
                 if (location.isEmpty()) {
-                    Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.years?)?.\\d*.months?\\)");
-                    Matcher matcher = pattern.matcher(description);
-                    Boolean matchFound = matcher.find();
-                    if (matchFound) {
-                        timePeriod = matcher.group(0);
-                        description = description.substring(timePeriod.length(), description.length() - 1);
-                    }
+                    extractTimePeriodFromDescription(description);
                 }
                 if (location.isEmpty() && timePeriod.isEmpty()) {
-                    Pattern pattern = Pattern.compile("(\\d*.years?.)?(\\d*.months?)");
-                    Matcher matcher = pattern.matcher(description);
-                    Boolean matchFound = matcher.find();
-                    if (matchFound) {
-                        timePeriod = matcher.group(0);
-                        description = description.substring(timePeriod.length(), description.length() - 1);
-                    }
+                    extractTimePeriodFromCompanyDescriptionWithMorePositions(description);
                 }
                 if (!location.isEmpty() && timePeriod.isEmpty()) {
                     timePeriod = description;
                     description = "";
                 }
-                company = removeLastWhiteSpace(company);
-                title = removeLastWhiteSpace(title);
-                timePeriod = removeLastWhiteSpace(timePeriod);
-                description = removeLastWhiteSpace(description);
-                JSONObject jsonStringChild = new JSONObject();
-                jsonStringChild.put("company", company);
-                jsonStringChild.put("title", title);
-                jsonStringChild.put("timePeriod", jsonStringService.getLongDuration(timePeriod));
-                jsonStringChild.put("description", description);
-                positionsList.add(jsonStringChild);
-                /**identifying the pattern with only having service duration, which having several positions company details*/
+                assignValuesToJsonChildObject(company,title,timePeriod,description);
+                /**identifying the pattern with only having service duration, which having several position company details*/
                 if (hasOnlyServiceDuration) {
-                    JSONObject totalTimePeriod = new JSONObject();
-                    totalTimePeriod.put("duration", jsonStringService.getShortDuration(timePeriodWithMorePositions,true));
-                    totalTimePeriod.put("starting",positionsList.get(positionsList.size()-1).getJSONObject("timePeriod").getJSONObject("starting"));
-                    totalTimePeriod.put("ending",positionsList.get(0).getJSONObject("timePeriod").getJSONObject("ending"));
-                    JSONObject jsonStringParent = new JSONObject();
-                    jsonStringParent.put("company", companyWithMorePositions);
-                    jsonStringParent.put("timePeriod", totalTimePeriod);
-                    jsonStringParent.put("positions", positionsList);
-                    experienceList.add(jsonStringParent);
-                    hasOnlyServiceDuration = false;
-                    companyWithMorePositions = "";
-                    timePeriodWithMorePositions = "";
-                    positionsList.clear();
+                    assignValuesToJsonMorePositionParentObject(companyWithMorePositions,timePeriodWithMorePositions,positionsList);
+                    companyWithMorePositions="";
+                    timePeriodWithMorePositions="";
                 } else {
-                    JSONObject jsonStringParent = new JSONObject();
-                    jsonStringParent.put("company", company);
-                    jsonStringParent.put("timePeriod", jsonStringService.getLongDuration(timePeriod));
-                    jsonStringParent.put("positions", positionsList);
-                    experienceList.add(jsonStringParent);
-                    positionsList.clear();
+                    assignValuesToJsonParentObject(company,timePeriod,positionsList);
                 }
                 company = "";
                 title = "";
@@ -235,33 +197,17 @@ public class ReadPdfService{
             /**identify the position from several positions under one company name*/
             if (styleFontSize.matches(titleFontSize) && previousElementStyleFontSize.matches(commonSmallestFontSize) && !title.isEmpty()) {
                 if (location.isEmpty()) {
-                    Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.year)?.\\d*.months?\\)");
-                    Matcher matcher = pattern.matcher(description);
-                    Boolean matchFound = matcher.find();
-                    if (matchFound) {
-                        timePeriod = matcher.group(0);
-                        description = description.substring(timePeriod.length(), description.length() - 1);
-                    }
+                    extractTimePeriodFromDescription(description);
                 }
                 if (location.isEmpty() && timePeriod.isEmpty()) {
-                    Pattern pattern = Pattern.compile("(\\d*.years?.)?(\\d*.months?)");
-                    Matcher matcher = pattern.matcher(description);
-                    Boolean matchFound = matcher.find();
-                    if (matchFound) {
-                        timePeriod = matcher.group(0);
-                        description = description.substring(timePeriod.length(), description.length() - 1);
-                    }
+                    extractTimePeriodFromCompanyDescriptionWithMorePositions(description);
                 }
                 if (!location.isEmpty() && timePeriod.isEmpty()) {
                     timePeriod = description;
                     description = "";
                 }
-                JSONObject jsonStringChild = new JSONObject();
-                jsonStringChild.put("company", removeLastWhiteSpace(company));
-                jsonStringChild.put("title", removeLastWhiteSpace(title));
-                jsonStringChild.put("timePeriod", jsonStringService.getLongDuration(removeLastWhiteSpace(timePeriod)));
-                jsonStringChild.put("description", removeLastWhiteSpace(description));
-                positionsList.add(jsonStringChild);
+                /**assign values to json object and added to the positions list*/
+                assignValuesToJsonChildObject(company, title, timePeriod, description);
                 title = "";
                 description = "";
                 timePeriod = "";
@@ -284,19 +230,32 @@ public class ReadPdfService{
                 description += element.text() + " ";
             }
         }
-        /**discard saved pdf and html, creating the final response with profile and experience objects in data object*/
+        /**discard saved pdf and html*/
         fileManageService.discardFiles(savedFileLocation);
         fileManageService.discardFiles(savedFileLocation.substring(0, savedFileLocation.length() - 4) + ".html");
-        jsonData.put("profile", profileDetails);
-        jsonData.put("experiences", experienceList);
-        finalJsonOutput.put("success", successResponse);
-        finalJsonOutput.put("data", jsonData);
-        listOfElements.clear();
-        cleanListOfElements.clear();
-        experienceList.clear();
-        positionsList.clear();
+        createTheFinalOutput();
+        cleanVariableLists();
         return finalJsonOutput.toString();
     }
+    public void extractTimePeriodFromDescription(String description){
+        Pattern pattern = Pattern.compile("[A-Za-z]*.\\d{4}.-.(([A-Za-z]*.\\d{4})|(Present)).\\((\\d*.years?)?.\\d*.months?\\)");
+        Matcher matcher = pattern.matcher(description);
+        Boolean matchFound = matcher.find();
+        if (matchFound) {
+            timePeriod = matcher.group(0);
+            description = description.substring(timePeriod.length(), description.length() - 1);
+        }
+    }
+    public void extractTimePeriodFromCompanyDescriptionWithMorePositions(String description){
+        Pattern pattern = Pattern.compile("(\\d*.years?.)?(\\d*.months?)");
+        Matcher matcher = pattern.matcher(description);
+        Boolean matchFound = matcher.find();
+        if (matchFound) {
+            timePeriod = matcher.group(0);
+            description = description.substring(timePeriod.length(), description.length() - 1);
+        }
+    }
+
     /**get the style property and split that from ";" and get the style attribute value*/
     public String extractStyleValues(Element element, int indexOfAttribute){
         String style = element.attr("style");
@@ -310,5 +269,53 @@ public class ReadPdfService{
         if (string.length() != 0 && string.charAt(string.length() - 1) == ' ')
             string = string.substring(0, string.length() - 1);
         return string;
+    }
+    public void saveProfileDetailsIntoJson(String profileName, String linkedinProfileLink, String emailAddress, String currentPosition, String currentLocation){
+        profileDetails.put("profileName", removeLastWhiteSpace(profileName));
+        profileDetails.put("linkedinProfileLink", removeLastWhiteSpace(linkedinProfileLink));
+        profileDetails.put("emailAddress", removeLastWhiteSpace(emailAddress));
+        profileDetails.put("currentPosition", removeLastWhiteSpace(currentPosition));
+        profileDetails.put("currentLocation", removeLastWhiteSpace(currentLocation));
+    }
+    public void assignValuesToJsonChildObject(String company, String title, String timePeriod, String description){
+        JSONObject jsonStringChild = new JSONObject();
+        jsonStringChild.put("company", removeLastWhiteSpace(company));
+        jsonStringChild.put("title", removeLastWhiteSpace(title));
+        jsonStringChild.put("timePeriod", jsonStringService.getLongDuration(removeLastWhiteSpace(timePeriod)));
+        jsonStringChild.put("description", removeLastWhiteSpace(description));
+        positionsList.add(jsonStringChild);
+    }
+    public void assignValuesToJsonParentObject(String company, String timePeriod, List<JSONObject> positionsList){
+        JSONObject jsonStringParent = new JSONObject();
+        jsonStringParent.put("company", company);
+        jsonStringParent.put("timePeriod", jsonStringService.getLongDuration(timePeriod));
+        jsonStringParent.put("positions", positionsList);
+        experienceList.add(jsonStringParent);
+        positionsList.clear();
+    }
+    public void assignValuesToJsonMorePositionParentObject(String companyWithMorePositions, String timePeriodWithMorePositions, List<JSONObject> positionsList){
+        JSONObject totalTimePeriod = new JSONObject();
+        totalTimePeriod.put("duration", jsonStringService.getShortDuration(timePeriodWithMorePositions,true));
+        totalTimePeriod.put("starting",positionsList.get(positionsList.size()-1).getJSONObject("timePeriod").getJSONObject("starting"));
+        totalTimePeriod.put("ending",positionsList.get(0).getJSONObject("timePeriod").getJSONObject("ending"));
+        JSONObject jsonStringParent = new JSONObject();
+        jsonStringParent.put("company", companyWithMorePositions);
+        jsonStringParent.put("timePeriod", totalTimePeriod);
+        jsonStringParent.put("positions", positionsList);
+        experienceList.add(jsonStringParent);
+        hasOnlyServiceDuration = false;
+        positionsList.clear();
+    }
+    public void cleanVariableLists(){
+        listOfElements.clear();
+        cleanListOfElements.clear();
+        experienceList.clear();
+        positionsList.clear();
+    }
+    public void createTheFinalOutput(){
+        jsonData.put("profile", profileDetails);
+        jsonData.put("experiences", experienceList);
+        finalJsonOutput.put("success", successResponse);
+        finalJsonOutput.put("data", jsonData);
     }
 }

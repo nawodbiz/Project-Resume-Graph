@@ -4,7 +4,7 @@ import com.example.Project.Resume.Graph.errors.ApiException;
 import com.example.Project.Resume.Graph.model.ExperienceModel;
 import com.example.Project.Resume.Graph.model.PositionModel;
 import com.example.Project.Resume.Graph.model.ProfileModel;
-import com.example.Project.Resume.Graph.service.FindFromDBService;
+import com.example.Project.Resume.Graph.service.OperationsOnDBService;
 import com.example.Project.Resume.Graph.service.ReadPdfService;
 import com.example.Project.Resume.Graph.service.SaveToDBService;
 import com.example.Project.Resume.Graph.util.StartupUtility;
@@ -25,7 +25,7 @@ public class ProfileController {
     @Autowired
     private StartupUtility startupUtility;
     @Autowired
-    private FindFromDBService findFromDBService;
+    private OperationsOnDBService operationsOnDBService;
     /**upload the json data into database*/
     @PostMapping("/save")
     public String saveProfileData(@RequestBody MultipartFile file) throws JsonProcessingException {
@@ -57,11 +57,27 @@ public class ProfileController {
     /**get all saved profiles from the db*/
     @GetMapping("/getAllProfiles")
     public List<ProfileModel> getAllProfiles(){
-        return findFromDBService.profileList();
+        return operationsOnDBService.profileList();
     }
     /**get data for a specific name from the db*/
     @GetMapping("/getProfile")
     public ProfileModel getSelectedProfile(@RequestBody ProfileModel profileModel){
-        return findFromDBService.findByProfileName(profileModel.getProfileName());
+        return operationsOnDBService.findByProfileName(profileModel.getProfileName());
+    }
+    @DeleteMapping("/deleteProfile")
+    public String deleteProfile(@RequestBody ProfileModel profileModel){
+        try{
+            System.out.println(profileModel.getProfileName());
+
+        operationsOnDBService.deleteDataByProfileName(profileModel.getProfileName());
+        return profileModel.getProfileName()+"'s profile data has deleted successfully";
+        }catch (Exception e){
+            return "invalid input";
+        }
+    }
+    @DeleteMapping("/deleteAll")
+    public String deleteAllInDatabase(){
+        operationsOnDBService.deleteAllInDatabase();
+        return "database cleaned";
     }
 }

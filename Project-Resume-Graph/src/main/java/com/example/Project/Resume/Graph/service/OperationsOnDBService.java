@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class FindFromDBService {
+public class OperationsOnDBService {
     @Autowired
     ProfileRepository profileRepository;
     public List<ProfileModel> profileList (){
@@ -16,5 +16,11 @@ public class FindFromDBService {
     }
     public ProfileModel findByProfileName(String profileName){
         return profileRepository.findByprofileName(profileName);
+    }
+    public void deleteDataByProfileName(String profileName){
+        profileRepository.deleteByprofileName(profileName);
+    }
+    public void deleteAllInDatabase(){
+        profileRepository.deleteAll();
     }
 }
