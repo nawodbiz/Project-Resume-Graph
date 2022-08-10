@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,15 +66,9 @@ public class ReadPdfService{
     @Value("${ExperienceWordingFontSize}")
     String ExperienceWordingFontSize;
     public String extractExperiences(MultipartFile file) throws IOException {
-        String savedFileLocation = fileManageService.getSavedFileLocation(file);
-        PDDocument uploadedPdf = PDDocument.load(new File(savedFileLocation));
-        Writer output = new PrintWriter(savedFileLocation.substring(0, savedFileLocation.length() - 4) + ".html", "utf-8");
-        new PDFDomTree().writeText(uploadedPdf, output);
-        output.close();
-        uploadedPdf.close();
-        File input = new File(savedFileLocation.substring(0, savedFileLocation.length() - 4) + ".html");
-        Document doc = Jsoup.parse(input, "UTF-8");
-        Elements allElements = doc.getAllElements();
+        String savedFileLocation = "uploaded/"+ UUID.randomUUID()+".pdf";
+        Document GeneratedHtmlDocument = fileManageService.getSavedFileLocation(file, savedFileLocation);
+        Elements allElements = GeneratedHtmlDocument.getAllElements();
         /**adding all elements to a Array list named allElements **/
         for (Element element : allElements) {
             listOfElements.add(element);
