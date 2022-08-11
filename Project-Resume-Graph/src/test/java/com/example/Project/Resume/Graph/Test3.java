@@ -1,5 +1,6 @@
 package com.example.Project.Resume.Graph;
 
+import lombok.Value;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
@@ -12,9 +13,7 @@ public class Test3 {
     public void testing() {
 
 
-        String file = "Profile (2).pdf";
 
-        System.out.println(file.substring(file.length() - 4));
 
 
     }
